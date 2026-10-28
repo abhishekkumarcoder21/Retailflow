@@ -7,6 +7,7 @@ import org.slf4j.MDC;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.AuthenticationException;
@@ -122,6 +123,21 @@ public class GlobalExceptionHandler {
                 .timestamp(LocalDateTime.now())
                 .correlationId(getCorrelationId())
                 .validationErrors(errors)
+                .build();
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ErrorResponse> handleHttpMessageNotReadable(
+            HttpMessageNotReadableException ex, HttpServletRequest request) {
+        log.warn("Malformed JSON payload: {}", ex.getMessage());
+        ErrorResponse response = ErrorResponse.builder()
+                .error("MALFORMED_JSON")
+                .message("Malformed JSON request body")
+                .status(HttpStatus.BAD_REQUEST.value())
+                .path(request.getRequestURI())
+                .timestamp(LocalDateTime.now())
+                .correlationId(getCorrelationId())
                 .build();
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
