@@ -1,0 +1,32 @@
+# Operating System
+.DS_Store
+Thumbs.db
+
+# Java & Maven
+backend/target/
+backend/.mvn/wrapper/maven-wrapper.jar
+*.class
+*.jar
+*.war
+.idea/
+*.iml
+.vscode/
+
+# Node & Next.js
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment & Local Secrets
+.env
+.env.local
+.env.production
+.env.development
+
+# Archives
+*.zip
+*.tar.gz

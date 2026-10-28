@@ -1,0 +1,57 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:16-alpine
+    container_name: retailflow-postgres
+    restart: always
+    environment:
+      POSTGRES_DB: retailflow
+      POSTGRES_USER: retailflow
+      POSTGRES_PASSWORD: retailflow_dev
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U retailflow -d retailflow"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # Spring Boot Backend API
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: retailflow-backend
+    restart: on-failure
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+    environment:
+      DATABASE_URL: jdbc:postgresql://postgres:5432/retailflow
+      DATABASE_USERNAME: retailflow
+      DATABASE_PASSWORD: retailflow_dev
+      JWT_SECRET: super_secret_jwt_key_that_is_at_least_256_bits_long_retailflow_ai_2026!
+      CORS_ALLOWED_ORIGINS: http://localhost:3000
+
+  # Next.js Frontend
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: retailflow-frontend
+    restart: on-failure
+    depends_on:
+      - backend
+    ports:
+      - "3000:3000"
+    environment:
+      PORT: 3000
+
+volumes:
+  postgres_data:
